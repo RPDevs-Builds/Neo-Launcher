@@ -43,6 +43,7 @@ import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderNameInfos;
+import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.icons.BitmapRenderer;
 import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logger.LauncherAtom.Attribute;
@@ -179,6 +180,9 @@ public class FolderInfo extends CollectionInfo {
         onIconChanged();
     }
 
+    /**
+     * Retrieves the first application item contained in the folder to act as the cover item.
+     */
     @Nullable
     public WorkspaceItemInfo getCoverInfo() {
         for (ItemInfo item : getContents()) {
@@ -187,11 +191,15 @@ public class FolderInfo extends CollectionInfo {
         return null;
     }
 
+    /**
+     * Returns the icon drawable for this folder.
+     * When Cover Mode is active, returns the themed icon of the first child app.
+     */
     public Drawable getIcon(Context context) {
         Launcher launcher = Launcher.getLauncher(context);
         if (isCoverMode()) {
             WorkspaceItemInfo cover = getCoverInfo();
-            return cover != null ? cover.newIcon(context) : null;
+            return cover != null ? cover.newIcon(context, BitmapInfo.FLAG_THEMED) : null;
         }
         return getFolderIcon(launcher);
     }
@@ -210,16 +218,22 @@ public class FolderInfo extends CollectionInfo {
         return new BitmapDrawable(launcher.getResources(), b);
     }
 
+    /**
+     * Returns the appropriate title to display for this folder on the workspace.
+     * Handles null folders and empty coverInfo safely.
+     */
     public CharSequence getIconTitle(Folder folder) {
         if (!isCoverMode()) {
-            if (!TextUtils.equals(folder.getDefaultFolderName(), title)) {
+            if (folder != null && !TextUtils.equals(folder.getDefaultFolderName(), title)) {
                 return title;
-            } else {
+            } else if (folder != null) {
                 return folder.getDefaultFolderName();
+            } else {
+                return title;
             }
         } else {
             WorkspaceItemInfo info = getCoverInfo();
-            return info.title;
+            return info != null && info.title != null ? info.title : title;
         }
     }
 

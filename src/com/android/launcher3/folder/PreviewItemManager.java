@@ -144,10 +144,24 @@ public class PreviewItemManager {
         return animateDrawable;
     }
 
+    /**
+     * Recomputes preview layout and animation geometry.
+     * When mReferenceDrawable is null (such as in Cover Mode or before child views are bound),
+     * falls back to the DeviceProfile icon size to guarantee previewLayoutRule is properly initialized
+     * and prevent NaN scale calculations during folder spring animations.
+     */
     public void recomputePreviewDrawingParams() {
         if (mReferenceDrawable != null) {
             computePreviewDrawingParams(mReferenceDrawable.getIntrinsicWidth(),
                     mIcon.getMeasuredWidth());
+        } else if (mIcon != null && mIcon.mActivity != null && mIcon.mActivity.getDeviceProfile() != null) {
+            int iconSize = mIcon.isInAppDrawer()
+                    ? mIcon.mActivity.getDeviceProfile().getAllAppsProfile().getIconSizePx()
+                    : mIcon.mActivity.getDeviceProfile().getWorkspaceIconProfile().getIconSizePx();
+            int totalWidth = mIcon.getMeasuredWidth() > 0 ? mIcon.getMeasuredWidth() : iconSize;
+            if (iconSize > 0 && totalWidth > 0) {
+                computePreviewDrawingParams(iconSize, totalWidth);
+            }
         }
     }
 

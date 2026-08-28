@@ -153,6 +153,20 @@ public class FolderAdaptiveIcon extends AdaptiveIconDrawable {
         icon.drawDot(badgeCanvas);
         badgeCanvas.restore();
 
+        // When Cover Mode is active, render the cover application icon on the drag layer foreground
+        // and bypass the round folder background plate.
+        if (icon.getFolderInfo() != null && icon.getFolderInfo().isCoverMode()) {
+            Drawable cover = icon.getCoverDrawable();
+            if (cover != null) {
+                foregroundCanvas.save();
+                foregroundCanvas.translate(previewShiftX, previewShiftY);
+                cover.setBounds(sTmpRect);
+                cover.draw(foregroundCanvas);
+                foregroundCanvas.restore();
+            }
+            return;
+        }
+
         // Draw foreground
         foregroundCanvas.save();
         foregroundCanvas.translate(previewShiftX, previewShiftY);

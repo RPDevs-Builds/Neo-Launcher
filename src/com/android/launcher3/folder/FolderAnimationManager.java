@@ -409,11 +409,13 @@ public class FolderAnimationManager implements FolderAnimationCreator {
             float previewScale = rule.scaleForItem(numItemsInFirstPagePreview, 0);
             float previewSize = rule.getIconSize() * previewScale;
             float baseIconSize = getBubbleTextView(v).getIconSize();
-            float iconScale = previewSize / baseIconSize;
+            float iconScale = baseIconSize > 0 ? previewSize / baseIconSize : 1f;
 
-            final float initialScale = iconScale / folderScale;
+            float safeFolderScale = (folderScale > 0f && !Float.isNaN(folderScale) && !Float.isInfinite(folderScale)) ? folderScale : 1f;
+            final float initialScale = iconScale / safeFolderScale;
             final float finalScale = 1f;
             float scale = mIsOpening ? initialScale : finalScale;
+            if (Float.isNaN(scale) || Float.isInfinite(scale) || scale <= 0f) scale = 1f;
             v.setScaleX(scale);
             v.setScaleY(scale);
 

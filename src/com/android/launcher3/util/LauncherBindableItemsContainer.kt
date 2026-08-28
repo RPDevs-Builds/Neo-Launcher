@@ -46,6 +46,14 @@ interface LauncherBindableItemsContainer {
                     v.applyFromWorkspaceItem(info)
                 v is FolderIcon && info is FolderInfo -> {
                     v.updatePreviewItems(updates::contains)
+                    // If an icon update affects the folder's cover item, reload the cover drawable immediately
+                    if (info.isCoverMode) {
+                        val cover = info.coverInfo
+                        if (cover != null && updates.contains(cover)) {
+                            v.updateCoverDrawable()
+                            v.invalidate()
+                        }
+                    }
                     if (updates.contains(info)) {
                         v.onItemsChanged(false)
                         v.folder.apply {
